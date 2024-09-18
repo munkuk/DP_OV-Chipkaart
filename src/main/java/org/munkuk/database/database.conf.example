@@ -1,0 +1,4 @@
+[database]
+host = localhost
+user = admin
+password = your_secure_password
