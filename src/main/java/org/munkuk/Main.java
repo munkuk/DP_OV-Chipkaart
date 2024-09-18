@@ -40,24 +40,22 @@ public class Main {
         String gbdatum = "1981-03-14";
         Reiziger sietske = new Reiziger(77, "S", "", "Boers", java.sql.Date.valueOf(gbdatum));
         rdao.delete(sietske);
-        System.out.print("[Test] Eerst " + reizigers.size() + " reizigers, na ReizigerDAO.save() ");
+        System.out.print("[Test] ReizigerDAO.save() eerst " + reizigers.size() + " reizigers, na ReizigerDAO.save() ");
         rdao.save(sietske);
         reizigers = rdao.findAll();
         System.out.println(reizigers.size() + " reizigers\n");
 
         // Voeg aanvullende tests van de ontbrekende CRUD-operaties in.
-        System.out.println("Testing updates: ");
-        System.out.println("[Test] Eerst: " + rdao.findById(77));
+        System.out.println("[Test] ReizigerDAO.update() eerst: " + rdao.findById(77));
         sietske.setTussenvoegsel("temp");
         rdao.update(sietske);
-        System.out.println("[Test] Vervolgens: " + rdao.findById(77) + "\n");
+        System.out.println("[Test] ReizigerDAO.update() vervolgens: " + rdao.findById(77) + "\n");
 
-        System.out.println("Testing delete: ");
         reizigers = rdao.findAll();
-        System.out.println("[Test] Eerst: " + reizigers.size());
+        System.out.println("[Test] ReizigerDAO.delete() eerst: " + reizigers.size());
         rdao.delete(sietske);
         reizigers = rdao.findAll();
-        System.out.println("[Test] Vervolgens: " + reizigers.size());
+        System.out.println("[Test] ReizigerDAO.delete() vervolgens: " + reizigers.size());
     }
 
 }

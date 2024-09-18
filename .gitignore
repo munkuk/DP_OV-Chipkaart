@@ -37,5 +37,6 @@ build/
 ### Mac OS ###
 .DS_Store
 
-.src/main/java/org/example/database/database.conf
+.src/main/java/org/munkuk/database/database.conf
 .database.conf
+/src/main/java/org/munkuk/database/database.conf
