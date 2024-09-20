@@ -39,4 +39,5 @@ build/
 
 .src/main/java/org/munkuk/database/database.conf
 .database.conf
-/src/main/java/org/munkuk/database/database.conf
+/src/main/resources/database.conf
+/src/main/resources/hibernate.cfg.xml

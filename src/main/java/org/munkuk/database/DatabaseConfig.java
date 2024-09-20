@@ -16,7 +16,7 @@ public class DatabaseConfig {
     public DatabaseConfig() {
         Properties properties = new Properties();
         try {
-            FileInputStream file = new FileInputStream("src/main/java/org/munkuk/database/database.conf");
+            FileInputStream file = new FileInputStream("src/main/resources/database.conf");
             properties.load(file);
             this.dbURL = properties.getProperty("host");
             this.dbUser = properties.getProperty("user");

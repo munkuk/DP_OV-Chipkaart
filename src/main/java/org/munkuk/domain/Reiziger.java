@@ -1,14 +1,18 @@
 package org.munkuk.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.*;
 
 import java.sql.Date;
 
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor
+@Entity @Table(name = "reiziger")
+@Getter @AllArgsConstructor @NoArgsConstructor
 public class Reiziger {
 
+    @Id @Column(name = "reiziger_id")
     private int id;
     @Setter
     private String voorletters;
@@ -27,5 +31,4 @@ public class Reiziger {
                 + ", geboortedatum=" + geboortedatum
                 + "]";
     }
-
 }

@@ -27,6 +27,7 @@ public class ReizigersDAOPsql implements ReizigerDAO {
 
         preparedStatement.executeUpdate();
         preparedStatement.close();
+
         return true;
     }
 
@@ -95,6 +96,7 @@ public class ReizigersDAOPsql implements ReizigerDAO {
         while (resultSet.next()) {
             reizigers.add(resultSetToReiziger(resultSet));
         }
+
         return reizigers;
     }
 
