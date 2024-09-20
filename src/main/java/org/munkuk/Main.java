@@ -4,9 +4,12 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.munkuk.database.DatabaseConnection;
 import org.munkuk.database.HibernateUtil;
+import org.munkuk.database.dao.OVChipkaartDAOHibernate;
 import org.munkuk.database.dao.ReizigerDAOHibernate;
+import org.munkuk.database.dao.interfaces.OVChipkaartDAO;
 import org.munkuk.database.dao.interfaces.ReizigerDAO;
 import org.munkuk.database.dao.ReizigersDAOPsql;
+import org.munkuk.domain.OVChipkaart;
 import org.munkuk.domain.Reiziger;
 
 import java.sql.*;
@@ -19,8 +22,11 @@ public class Main {
 
         try (session) {
             ReizigerDAOHibernate reizigerDAOHibernate = new ReizigerDAOHibernate(session);
+            OVChipkaartDAOHibernate ovChipkaartDAOHibernate = new OVChipkaartDAOHibernate(session);
             testReizigerDAO(reizigerDAOPsql);
             testReizigerDAO(reizigerDAOHibernate);
+
+            testOVChipkaartDAO(reizigerDAOHibernate, ovChipkaartDAOHibernate);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         } finally {
@@ -51,7 +57,7 @@ public class Main {
 
         // Maak een nieuwe reiziger aan en persisteer deze in de database
         String gbdatum = "1981-03-14";
-        Reiziger sietske = new Reiziger(77, "S", "", "Boers", java.sql.Date.valueOf(gbdatum));
+        Reiziger sietske = new Reiziger(77, "S", "", "Boers", Date.valueOf(gbdatum));
         rdao.delete(sietske);
         System.out.print("[Test] ReizigerDAO.save() eerst " + reizigers.size() + " reizigers, na ReizigerDAO.save() ");
         rdao.save(sietske);
@@ -71,4 +77,40 @@ public class Main {
         System.out.println("[Test] ReizigerDAO.delete() vervolgens: " + reizigers.size());
     }
 
+    private static void testOVChipkaartDAO(ReizigerDAO rdao, OVChipkaartDAO ovcDAO) throws SQLException {
+        System.out.println("\n---------- Test OVChipkaartDAO -------------");
+        System.out.println(ovcDAO.getClass() + "\n");
+
+        List<OVChipkaart> ovchipkaarts = ovcDAO.findAll();
+        System.out.println("[Test] OVChipkaartDAO.findAll() geeft de volgende ovchipkaarts:");
+        for (OVChipkaart ov : ovchipkaarts) {
+            System.out.println(ov);
+        }
+        System.out.println();
+
+        Reiziger daan = new Reiziger(88, "D", "de", "Jong", Date.valueOf("2005-01-01"));
+
+        System.out.println("[Test] OVChipkaartDAO.save() eerst " + ovchipkaarts.size() + " ovchipkaarten.");
+
+        OVChipkaart ovChipkaart = new OVChipkaart(12345, daan, Date.valueOf("2024-12-20"), 1, 150);
+        rdao.save(daan);
+        ovcDAO.save(ovChipkaart);
+
+        ovchipkaarts = ovcDAO.findAll();
+        System.out.println("[Test] OVChipkaartDAO.save() vervolgens: " + ovchipkaarts.size() + " ovchipkaarten\n");
+
+
+        System.out.println("[Test] OVChipkaartDAO.update() eerst: " + ovcDAO.findById(12345));
+        ovChipkaart.setGeldig_tot(Date.valueOf("2025-12-20"));
+        ovcDAO.update(ovChipkaart);
+        System.out.println("[Test] OVChipkaartDAO.update() vervolgens: " + ovcDAO.findById(12345) + "\n");
+
+        ovchipkaarts = ovcDAO.findAll();
+        System.out.println("[Test] OVChipkaartDAO.delete() eerst: " + ovchipkaarts.size());
+        ovcDAO.delete(ovChipkaart);
+        ovchipkaarts = ovcDAO.findAll();
+        System.out.println("[Test] OVChipkaartDAO.delete() vervolgens: " + ovchipkaarts.size());
+
+        rdao.delete(daan);
+    }
 }
