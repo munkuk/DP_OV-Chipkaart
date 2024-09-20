@@ -3,26 +3,25 @@ package org.munkuk.database.dao;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.munkuk.database.dao.interfaces.ReizigerDAO;
+import org.munkuk.database.dao.interfaces.OVChipkaartDAO;
+import org.munkuk.domain.OVChipkaart;
 import org.munkuk.domain.Reiziger;
 
-import java.sql.Date;
+import java.sql.SQLException;
 import java.util.List;
 
-public class ReizigerDAOHibernate implements ReizigerDAO {
+public class OVChipkaartDAOHibernate implements OVChipkaartDAO {
 
     Session session;
-    public ReizigerDAOHibernate(Session session) {
-        this.session = session;
-    }
+    public OVChipkaartDAOHibernate(Session session) { this.session = session; }
 
     @Override
-    public boolean save(Reiziger reiziger) {
+    public boolean save(OVChipkaart ovChipkaart) {
         Transaction transaction = null;
 
         try {
             transaction = session.beginTransaction();
-            session.persist(reiziger);
+            session.persist(ovChipkaart);
 
             transaction.commit();
             return true;
@@ -35,12 +34,12 @@ public class ReizigerDAOHibernate implements ReizigerDAO {
     }
 
     @Override
-    public boolean update(Reiziger reiziger) {
+    public boolean update(OVChipkaart ovChipkaart) {
         Transaction transaction = null;
 
         try {
             transaction = session.beginTransaction();
-            session.merge(reiziger);
+            session.merge(ovChipkaart);
 
             transaction.commit();
             return true;
@@ -53,12 +52,12 @@ public class ReizigerDAOHibernate implements ReizigerDAO {
     }
 
     @Override
-    public boolean delete(Reiziger reiziger)  {
+    public boolean delete(OVChipkaart ovChipkaart) {
         Transaction transaction = null;
 
         try {
             transaction = session.beginTransaction();
-            session.remove(reiziger);
+            session.remove(ovChipkaart);
 
             transaction.commit();
             return true;
@@ -71,16 +70,16 @@ public class ReizigerDAOHibernate implements ReizigerDAO {
     }
 
     @Override
-    public Reiziger findById(int id) {
+    public OVChipkaart findById(int id) {
         Transaction transaction = null;
-        Reiziger reiziger;
+        OVChipkaart ovChipkaart;
 
         try {
             transaction = session.beginTransaction();
-            reiziger = session.get(Reiziger.class, id);
+            ovChipkaart = session.get(OVChipkaart.class, id);
 
             transaction.commit();
-            return reiziger;
+            return ovChipkaart;
         } catch (HibernateException e) {
             if (transaction != null) {
                 transaction.rollback();
@@ -90,14 +89,14 @@ public class ReizigerDAOHibernate implements ReizigerDAO {
     }
 
     @Override
-    public List<Reiziger> findByGbdatum(Date date) {
+    public List<OVChipkaart> findByReiziger(Reiziger reiziger) {
         Transaction transaction = null;
-        List<Reiziger> reizigers;
+        List<OVChipkaart> ovChipkaarts;
 
         try {
             transaction = session.beginTransaction();
-            String hql = "from Reiziger r where r.geboortedatum = :date";
-            reizigers = session.createQuery(hql, Reiziger.class).setParameter("date", date).list();
+            String hql = "FROM OVChipkaart o WHERE o.reiziger_id = :id";
+            ovChipkaarts = session.createQuery(hql, OVChipkaart.class).setParameter("id", reiziger.getId()).list();
 
             transaction.commit();
         } catch (HibernateException e) {
@@ -106,17 +105,18 @@ public class ReizigerDAOHibernate implements ReizigerDAO {
             }
             return null;
         }
-        return reizigers;
+        return ovChipkaarts;
     }
 
     @Override
-    public List<Reiziger> findAll() {
+    public List<OVChipkaart> findAll() {
         Transaction transaction = null;
-        List<Reiziger> reizigers;
+        List<OVChipkaart> ovChipkaarts;
 
         try {
             transaction = session.beginTransaction();
-            reizigers = session.createQuery("from Reiziger", Reiziger.class).list();
+            ovChipkaarts = session.createQuery("from OVChipkaart", OVChipkaart.class).list();
+
             transaction.commit();
         } catch (HibernateException e) {
             if (transaction != null) {
@@ -124,6 +124,6 @@ public class ReizigerDAOHibernate implements ReizigerDAO {
             }
             return null;
         }
-        return reizigers;
+        return ovChipkaarts;
     }
 }
