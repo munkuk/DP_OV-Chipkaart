@@ -16,114 +16,57 @@ public class OVChipkaartDAOHibernate implements OVChipkaartDAO {
     public OVChipkaartDAOHibernate(Session session) { this.session = session; }
 
     @Override
-    public boolean save(OVChipkaart ovChipkaart) {
-        Transaction transaction = null;
+    public boolean save(OVChipkaart ovChipkaart) throws HibernateException {
+        Transaction transaction = session.beginTransaction();
+        session.persist(ovChipkaart);
 
-        try {
-            transaction = session.beginTransaction();
-            session.persist(ovChipkaart);
-
-            transaction.commit();
-            return true;
-        } catch (HibernateException e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            return false;
-        }
+        transaction.commit();
+        return true;
     }
 
     @Override
-    public boolean update(OVChipkaart ovChipkaart) {
-        Transaction transaction = null;
+    public boolean update(OVChipkaart ovChipkaart) throws HibernateException {
+        Transaction transaction = session.beginTransaction();
+        session.merge(ovChipkaart);
 
-        try {
-            transaction = session.beginTransaction();
-            session.merge(ovChipkaart);
-
-            transaction.commit();
-            return true;
-        } catch (HibernateException e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            return false;
-        }
+        transaction.commit();
+        return true;
     }
 
     @Override
-    public boolean delete(OVChipkaart ovChipkaart) {
-        Transaction transaction = null;
+    public boolean delete(OVChipkaart ovChipkaart) throws HibernateException {
+        Transaction transaction = session.beginTransaction();
+        session.remove(ovChipkaart);
 
-        try {
-            transaction = session.beginTransaction();
-            session.remove(ovChipkaart);
-
-            transaction.commit();
-            return true;
-        } catch (HibernateException e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            return false;
-        }
+        transaction.commit();
+        return true;
     }
 
     @Override
-    public OVChipkaart findById(int id) {
-        Transaction transaction = null;
-        OVChipkaart ovChipkaart;
+    public OVChipkaart findById(int id) throws HibernateException {
+        Transaction transaction = session.beginTransaction();
+        OVChipkaart ovChipkaart = session.get(OVChipkaart.class, id);
 
-        try {
-            transaction = session.beginTransaction();
-            ovChipkaart = session.get(OVChipkaart.class, id);
-
-            transaction.commit();
-            return ovChipkaart;
-        } catch (HibernateException e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            return null;
-        }
+        transaction.commit();
+        return ovChipkaart;
     }
 
     @Override
-    public List<OVChipkaart> findByReiziger(Reiziger reiziger) {
-        Transaction transaction = null;
-        List<OVChipkaart> ovChipkaarts;
+    public List<OVChipkaart> findByReiziger(Reiziger reiziger) throws HibernateException {
+        Transaction transaction = session.beginTransaction();
+        String hql = "FROM OVChipkaart o WHERE o.reiziger_id = :id";
+        List<OVChipkaart> ovChipkaarts = session.createQuery(hql, OVChipkaart.class).setParameter("id", reiziger.getId()).list();
 
-        try {
-            transaction = session.beginTransaction();
-            String hql = "FROM OVChipkaart o WHERE o.reiziger_id = :id";
-            ovChipkaarts = session.createQuery(hql, OVChipkaart.class).setParameter("id", reiziger.getId()).list();
-
-            transaction.commit();
-        } catch (HibernateException e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            return null;
-        }
+        transaction.commit();
         return ovChipkaarts;
     }
 
     @Override
-    public List<OVChipkaart> findAll() {
-        Transaction transaction = null;
-        List<OVChipkaart> ovChipkaarts;
+    public List<OVChipkaart> findAll() throws HibernateException {
+        Transaction transaction = session.beginTransaction();
+        List<OVChipkaart> ovChipkaarts = session.createQuery("from OVChipkaart", OVChipkaart.class).list();
 
-        try {
-            transaction = session.beginTransaction();
-            ovChipkaarts = session.createQuery("from OVChipkaart", OVChipkaart.class).list();
-
-            transaction.commit();
-        } catch (HibernateException e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            return null;
-        }
+        transaction.commit();
         return ovChipkaarts;
     }
 }

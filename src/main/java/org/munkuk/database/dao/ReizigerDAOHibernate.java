@@ -17,113 +17,60 @@ public class ReizigerDAOHibernate implements ReizigerDAO {
     }
 
     @Override
-    public boolean save(Reiziger reiziger) {
-        Transaction transaction = null;
+    public boolean save(Reiziger reiziger) throws HibernateException {
+        Transaction transaction = session.beginTransaction();
+        session.persist(reiziger);
 
-        try {
-            transaction = session.beginTransaction();
-            session.persist(reiziger);
-
-            transaction.commit();
-            return true;
-        } catch (HibernateException e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            return false;
-        }
+        transaction.commit();
+        return true;
     }
 
     @Override
-    public boolean update(Reiziger reiziger) {
-        Transaction transaction = null;
+    public boolean update(Reiziger reiziger) throws HibernateException {
+        Transaction transaction = session.beginTransaction();
+        session.merge(reiziger);
 
-        try {
-            transaction = session.beginTransaction();
-            session.merge(reiziger);
-
-            transaction.commit();
-            return true;
-        } catch (HibernateException e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            return false;
-        }
+        transaction.commit();
+        return true;
     }
 
     @Override
-    public boolean delete(Reiziger reiziger)  {
-        Transaction transaction = null;
+    public boolean delete(Reiziger reiziger) throws HibernateException {
+        Transaction transaction = session.beginTransaction();
+        session.remove(reiziger);
 
-        try {
-            transaction = session.beginTransaction();
-            session.remove(reiziger);
-
-            transaction.commit();
-            return true;
-        } catch (HibernateException e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            return false;
-        }
+        transaction.commit();
+        return true;
     }
 
     @Override
-    public Reiziger findById(int id) {
-        Transaction transaction = null;
+    public Reiziger findById(int id) throws HibernateException {
+        Transaction transaction = session.beginTransaction();
+
         Reiziger reiziger;
+        reiziger = session.get(Reiziger.class, id);
 
-        try {
-            transaction = session.beginTransaction();
-            reiziger = session.get(Reiziger.class, id);
-
-            transaction.commit();
-            return reiziger;
-        } catch (HibernateException e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            return null;
-        }
+        transaction.commit();
+        return reiziger;
     }
 
     @Override
-    public List<Reiziger> findByGbdatum(Date date) {
-        Transaction transaction = null;
-        List<Reiziger> reizigers;
+    public List<Reiziger> findByGbdatum(Date date) throws HibernateException {
+        Transaction transaction = session.beginTransaction();
 
-        try {
-            transaction = session.beginTransaction();
-            String hql = "from Reiziger r where r.geboortedatum = :date";
-            reizigers = session.createQuery(hql, Reiziger.class).setParameter("date", date).list();
+        String hql = "from Reiziger r where r.geboortedatum = :date";
+        List<Reiziger> reizigers = session.createQuery(hql, Reiziger.class).setParameter("date", date).list();
 
-            transaction.commit();
-        } catch (HibernateException e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            return null;
-        }
+        transaction.commit();
         return reizigers;
     }
 
     @Override
-    public List<Reiziger> findAll() {
-        Transaction transaction = null;
-        List<Reiziger> reizigers;
+    public List<Reiziger> findAll() throws HibernateException {
+        Transaction transaction = session.beginTransaction();
 
-        try {
-            transaction = session.beginTransaction();
-            reizigers = session.createQuery("from Reiziger", Reiziger.class).list();
-            transaction.commit();
-        } catch (HibernateException e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            return null;
-        }
+        List<Reiziger> reizigers = session.createQuery("from Reiziger", Reiziger.class).list();
+        transaction.commit();
         return reizigers;
     }
 }
