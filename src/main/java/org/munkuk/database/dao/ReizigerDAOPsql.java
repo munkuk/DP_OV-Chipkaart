@@ -7,10 +7,10 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ReizigersDAOPsql implements ReizigerDAO {
+public class ReizigerDAOPsql implements ReizigerDAO {
 
     Connection connection;
-    public ReizigersDAOPsql(Connection connection) {
+    public ReizigerDAOPsql(Connection connection) {
         this.connection = connection;
     }
 

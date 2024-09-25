@@ -1,14 +1,16 @@
 package org.munkuk;
 
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.munkuk.database.DatabaseConnection;
 import org.munkuk.database.HibernateUtil;
+import org.munkuk.database.dao.AdresDAOPsql;
 import org.munkuk.database.dao.OVChipkaartDAOHibernate;
 import org.munkuk.database.dao.ReizigerDAOHibernate;
+import org.munkuk.database.dao.interfaces.AdresDAO;
 import org.munkuk.database.dao.interfaces.OVChipkaartDAO;
 import org.munkuk.database.dao.interfaces.ReizigerDAO;
-import org.munkuk.database.dao.ReizigersDAOPsql;
+import org.munkuk.database.dao.ReizigerDAOPsql;
+import org.munkuk.domain.Adres;
 import org.munkuk.domain.OVChipkaart;
 import org.munkuk.domain.Reiziger;
 
@@ -18,14 +20,23 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) {
         Session session = HibernateUtil.getSessionFactory().openSession();
-        ReizigersDAOPsql reizigerDAOPsql = new ReizigersDAOPsql(DatabaseConnection.getConnection());
+        ReizigerDAOPsql reizigerDAOPsql = new ReizigerDAOPsql(DatabaseConnection.getConnection());
+        AdresDAOPsql adresDAOPsql = new AdresDAOPsql(DatabaseConnection.getConnection());
+        Reiziger daan = new Reiziger(88, "D", "de", "Jong", Date.valueOf("2005-01-01"));
 
         try (session) {
             ReizigerDAOHibernate reizigerDAOHibernate = new ReizigerDAOHibernate(session);
             OVChipkaartDAOHibernate ovChipkaartDAOHibernate = new OVChipkaartDAOHibernate(session);
-            testReizigerDAO(reizigerDAOPsql);
-            testReizigerDAO(reizigerDAOHibernate);
 
+            if (reizigerDAOPsql.findById(daan.getId()) == null) {
+                reizigerDAOPsql.save(daan);
+            }
+
+            testReizigerDAO(reizigerDAOPsql);
+
+            testAddressDAO(daan, adresDAOPsql);
+            reizigerDAOPsql.delete(daan);
+            testReizigerDAO(reizigerDAOHibernate);
             testOVChipkaartDAO(reizigerDAOHibernate, ovChipkaartDAOHibernate);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -99,7 +110,6 @@ public class Main {
         ovchipkaarts = ovcDAO.findAll();
         System.out.println("[Test] OVChipkaartDAO.save() vervolgens: " + ovchipkaarts.size() + " ovchipkaarten\n");
 
-
         System.out.println("[Test] OVChipkaartDAO.update() eerst: " + ovcDAO.findById(12345));
         ovChipkaart.setGeldig_tot(Date.valueOf("2025-12-20"));
         ovcDAO.update(ovChipkaart);
@@ -112,5 +122,38 @@ public class Main {
         System.out.println("[Test] OVChipkaartDAO.delete() vervolgens: " + ovchipkaarts.size());
 
         rdao.delete(daan);
+    }
+
+    private static void testAddressDAO(Reiziger reiziger, AdresDAO adresDAO) throws SQLException {
+        System.out.println("\n---------- Test AddressDAO -------------");
+        System.out.println(adresDAO.getClass() + "\n");
+
+        List<Adres> addresses = adresDAO.findAll();
+        System.out.println("[Test] AdresDAO.findAll() geeft de volgende addresses:");
+        for (Adres ad : addresses) {
+            System.out.println(ad);
+        }
+        System.out.println();
+
+//        Reiziger daan = new Reiziger(88, "D", "de", "Jong", Date.valueOf("2005-01-01"));
+//        reizigerDAO.save(daan);
+
+        System.out.println("[Test] AdresDAO.save() eerst " + addresses.size() + " adresen.");
+        Adres address = new Adres(7, "1234AB", "15", "Heidelberglaan", "Utrecht", reiziger);
+        adresDAO.save(address);
+
+        addresses = adresDAO.findAll();
+        System.out.println("[Test] AdresDAO.save() vervolgens: " + addresses.size() + " adresen.\n");
+
+        System.out.println("[Test] AdresDAO.update() eerst: " + adresDAO.findByReiziger(reiziger));
+        address.setPostcode("1337AB");
+        adresDAO.update(address);
+        System.out.println("[Test] AdresDAO.update() vervolgens: " + adresDAO.findByReiziger(reiziger) + "\n");
+
+        addresses = adresDAO.findAll();
+        System.out.println("[Test] AdresDAO.delete() eerst: " + addresses.size());
+        adresDAO.delete(address);
+        addresses = adresDAO.findAll();
+        System.out.println("[Test] AdresDAO.delete() vervolgens: " + addresses.size());
     }
 }
