@@ -3,13 +3,10 @@ package org.munkuk;
 import org.hibernate.Session;
 import org.munkuk.database.DatabaseConnection;
 import org.munkuk.database.HibernateUtil;
-import org.munkuk.database.dao.AdresDAOPsql;
-import org.munkuk.database.dao.OVChipkaartDAOHibernate;
-import org.munkuk.database.dao.ReizigerDAOHibernate;
+import org.munkuk.database.dao.*;
 import org.munkuk.database.dao.interfaces.AdresDAO;
 import org.munkuk.database.dao.interfaces.OVChipkaartDAO;
 import org.munkuk.database.dao.interfaces.ReizigerDAO;
-import org.munkuk.database.dao.ReizigerDAOPsql;
 import org.munkuk.domain.Adres;
 import org.munkuk.domain.OVChipkaart;
 import org.munkuk.domain.Reiziger;
@@ -21,6 +18,7 @@ public class Main {
     public static void main(String[] args) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         ReizigerDAOPsql reizigerDAOPsql = new ReizigerDAOPsql(DatabaseConnection.getConnection());
+        OVChipkaartDAOPsql ovChipkaartDAOPsql = new OVChipkaartDAOPsql(DatabaseConnection.getConnection());
         AdresDAOPsql adresDAOPsql = new AdresDAOPsql(DatabaseConnection.getConnection());
         Reiziger daan = new Reiziger(88, "D", "de", "Jong", Date.valueOf("2005-01-01"));
 
@@ -32,12 +30,15 @@ public class Main {
                 reizigerDAOPsql.save(daan);
             }
 
-            testReizigerDAO(reizigerDAOPsql);
-
-            testAddressDAO(daan, adresDAOPsql);
+            // Start PSQL connection testing
+//            testReizigerDAO(reizigerDAOPsql);
+//            testAddressDAO(daan, adresDAOPsql);
             reizigerDAOPsql.delete(daan);
-            testReizigerDAO(reizigerDAOHibernate);
-            testOVChipkaartDAO(reizigerDAOHibernate, ovChipkaartDAOHibernate);
+            testOVChipkaartDAO(reizigerDAOPsql, ovChipkaartDAOPsql);
+            // End PSQL connection testing
+
+//            testReizigerDAO(reizigerDAOHibernate);
+//            testOVChipkaartDAO(reizigerDAOHibernate, ovChipkaartDAOHibernate);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         } finally {

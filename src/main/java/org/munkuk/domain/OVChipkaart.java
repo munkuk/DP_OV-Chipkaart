@@ -16,13 +16,13 @@ public class OVChipkaart {
     private int id;
     @Setter private Date geldig_tot;
     @Setter private int klasse;
-    @Setter private int saldo;
+    @Setter private double saldo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reiziger_id")
     @Setter private Reiziger reiziger;
 
-    public OVChipkaart(int id, Reiziger reiziger, Date geldig_tot, int klasse, int saldo) {
+    public OVChipkaart(int id, Reiziger reiziger, Date geldig_tot, int klasse, double saldo) {
         this.id = id;
         this.reiziger = reiziger;
         this.geldig_tot = geldig_tot;
@@ -32,7 +32,7 @@ public class OVChipkaart {
 
     public String toString() {
         return "OVChipkaart [id=" + id
-//                + ", reiziger_id=" + reiziger_id
+                + ", reiziger_id=" + reiziger.getId()
                 + ", geldig_tot=" + geldig_tot
                 + ", klasse=" + klasse
                 + ", saldo=" + saldo
