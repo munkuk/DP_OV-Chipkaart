@@ -31,14 +31,14 @@ public class Main {
             }
 
             // Start PSQL connection testing
-//            testReizigerDAO(reizigerDAOPsql);
-//            testAddressDAO(daan, adresDAOPsql);
+            testReizigerDAO(reizigerDAOPsql);
+            testAddressDAO(daan, adresDAOPsql);
             reizigerDAOPsql.delete(daan);
             testOVChipkaartDAO(reizigerDAOPsql, ovChipkaartDAOPsql);
             // End PSQL connection testing
 
-//            testReizigerDAO(reizigerDAOHibernate);
-//            testOVChipkaartDAO(reizigerDAOHibernate, ovChipkaartDAOHibernate);
+            testReizigerDAO(reizigerDAOHibernate);
+            testOVChipkaartDAO(reizigerDAOHibernate, ovChipkaartDAOHibernate);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         } finally {
