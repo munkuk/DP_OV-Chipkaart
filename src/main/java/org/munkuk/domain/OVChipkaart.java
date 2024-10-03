@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity @Table(name = "ov_chipkaart")
 @Getter @AllArgsConstructor @NoArgsConstructor
@@ -22,12 +24,32 @@ public class OVChipkaart {
     @JoinColumn(name = "reiziger_id")
     @Setter private Reiziger reiziger;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "OV_Chipkaart_Product",
+            joinColumns = @JoinColumn(name = "kaart_nummer"),
+            inverseJoinColumns = @JoinColumn(name = "product_nummer"))
+    @Setter private List<Product> products = new ArrayList<>();
+
     public OVChipkaart(int id, Reiziger reiziger, Date geldig_tot, int klasse, int saldo) {
         this.id = id;
         this.reiziger = reiziger;
         this.geldig_tot = geldig_tot;
         this.klasse = klasse;
         this.saldo = saldo;
+    }
+
+    public void addProduct(Product product) {
+        if (!products.contains(product)) {
+            products.add(product);
+            product.getOvChipkaarts().add(this);
+        }
+    }
+
+    public void removeProduct(Product product) {
+        if (products.contains(product)) {
+            products.remove(product);
+            product.getOvChipkaarts().remove(this);
+        }
     }
 
     public String toString() {

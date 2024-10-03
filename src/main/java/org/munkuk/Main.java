@@ -3,18 +3,18 @@ package org.munkuk;
 import org.hibernate.Session;
 import org.munkuk.database.DatabaseConnection;
 import org.munkuk.database.HibernateUtil;
-import org.munkuk.database.dao.AdresDAOPsql;
-import org.munkuk.database.dao.OVChipkaartDAOHibernate;
-import org.munkuk.database.dao.ReizigerDAOHibernate;
+import org.munkuk.database.dao.*;
 import org.munkuk.database.dao.interfaces.AdresDAO;
 import org.munkuk.database.dao.interfaces.OVChipkaartDAO;
+import org.munkuk.database.dao.interfaces.ProductDAO;
 import org.munkuk.database.dao.interfaces.ReizigerDAO;
-import org.munkuk.database.dao.ReizigerDAOPsql;
 import org.munkuk.domain.Adres;
 import org.munkuk.domain.OVChipkaart;
+import org.munkuk.domain.Product;
 import org.munkuk.domain.Reiziger;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
@@ -27,6 +27,7 @@ public class Main {
         try (session) {
             ReizigerDAOHibernate reizigerDAOHibernate = new ReizigerDAOHibernate(session);
             OVChipkaartDAOHibernate ovChipkaartDAOHibernate = new OVChipkaartDAOHibernate(session);
+            ProductDAOHibernate productDAOHibernate = new ProductDAOHibernate(session);
 
             if (reizigerDAOPsql.findById(daan.getId()) == null) {
                 reizigerDAOPsql.save(daan);
@@ -35,7 +36,9 @@ public class Main {
             testReizigerDAO(reizigerDAOPsql);
 
             testAddressDAO(daan, adresDAOPsql);
+            testProductDAO(daan, ovChipkaartDAOHibernate, productDAOHibernate);
             reizigerDAOPsql.delete(daan);
+
             testReizigerDAO(reizigerDAOHibernate);
             testOVChipkaartDAO(reizigerDAOHibernate, ovChipkaartDAOHibernate);
         } catch (SQLException e) {
@@ -155,5 +158,43 @@ public class Main {
         adresDAO.delete(address);
         addresses = adresDAO.findAll();
         System.out.println("[Test] AdresDAO.delete() vervolgens: " + addresses.size());
+    }
+
+    private static void testProductDAO(Reiziger reiziger, OVChipkaartDAO ovChipkaartDAO, ProductDAO productDAO) throws SQLException {
+        System.out.println("\n---------- Test ProductDAO -------------");
+        System.out.println(productDAO.getClass() + "\n");
+
+        List<Product> products = productDAO.findAll();
+        System.out.println("[Test] ProductDAO.findAll() geeft de volgende products:");
+        for (Product product : products) {
+            System.out.println(product);
+        }
+        System.out.println();
+
+//        productDAO.delete(productDAO.findByOVChipkaart())
+
+        System.out.println("[Test] ProductDAO.save() eerst " + products.size() + " product.");
+        OVChipkaart ovChipkaart = new OVChipkaart(100, reiziger, Date.valueOf("2024-12-20"), 2, 100);
+        ovChipkaartDAO.save(ovChipkaart);
+        List<OVChipkaart> ovChipkaarts = new ArrayList<>();
+        ovChipkaarts.add(ovChipkaart);
+        Product product = new Product(120, "Studentenkorting", "Gratis rijden tijdens de week", 20.0, ovChipkaarts);
+        ovChipkaart.addProduct(product);
+        productDAO.save(product);
+        products = productDAO.findAll();
+        System.out.println("[Test] ProductDAO.save() vervolgens: " + products.size() + " product.\n");
+
+        System.out.println("[Test] ProductDAO.update() eerst " + productDAO.findByOVChipkaart(ovChipkaart) + " product.");
+        product.setNaam("Studentkorting");
+        productDAO.update(product);
+        System.out.println("[Test] ProductDAO.update() vervolgens: " + productDAO.findByOVChipkaart(ovChipkaart) + " product.\n");
+
+        products = productDAO.findAll();
+        System.out.println("[Test] ProductDAO.delete() eerst: " + products.size() + " product.");
+        productDAO.delete(product);
+        products = productDAO.findAll();
+        System.out.println("[Test] ProductDAO.delete() vervolgens: " + products.size() + " product.");
+
+        ovChipkaartDAO.delete(ovChipkaart);
     }
 }
