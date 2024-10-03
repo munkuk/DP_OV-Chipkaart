@@ -104,7 +104,7 @@ public class OVChipkaartDAOPsql implements OVChipkaartDAO {
         int id = resultSet.getInt("kaart_nummer");
         Date geldig_tot = resultSet.getDate("geldig_tot");
         int klasse = resultSet.getInt("klasse");
-        double saldo = resultSet.getDouble("saldo");
+        int saldo = resultSet.getInt("saldo");
         int reiziger_id = resultSet.getInt("reiziger_id");
 
         ReizigerDAOPsql reizigerDAOPsql = new ReizigerDAOPsql(connection);
