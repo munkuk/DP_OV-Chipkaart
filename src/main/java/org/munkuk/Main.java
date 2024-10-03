@@ -11,6 +11,7 @@ import org.munkuk.database.dao.interfaces.ReizigerDAO;
 import org.munkuk.domain.Adres;
 import org.munkuk.domain.OVChipkaart;
 import org.munkuk.domain.Product;
+import org.munkuk.domain.Product;
 import org.munkuk.domain.Reiziger;
 
 import java.sql.*;
@@ -21,6 +22,7 @@ public class Main {
     public static void main(String[] args) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         ReizigerDAOPsql reizigerDAOPsql = new ReizigerDAOPsql(DatabaseConnection.getConnection());
+        OVChipkaartDAOPsql ovChipkaartDAOPsql = new OVChipkaartDAOPsql(DatabaseConnection.getConnection());
         AdresDAOPsql adresDAOPsql = new AdresDAOPsql(DatabaseConnection.getConnection());
         Reiziger daan = new Reiziger(88, "D", "de", "Jong", Date.valueOf("2005-01-01"));
 
@@ -33,11 +35,13 @@ public class Main {
                 reizigerDAOPsql.save(daan);
             }
 
+            // Start PSQL connection testing
             testReizigerDAO(reizigerDAOPsql);
-
             testAddressDAO(daan, adresDAOPsql);
             testProductDAO(daan, ovChipkaartDAOHibernate, productDAOHibernate);
             reizigerDAOPsql.delete(daan);
+            testOVChipkaartDAO(reizigerDAOPsql, ovChipkaartDAOPsql);
+            // End PSQL connection testing
 
             testReizigerDAO(reizigerDAOHibernate);
             testOVChipkaartDAO(reizigerDAOHibernate, ovChipkaartDAOHibernate);
