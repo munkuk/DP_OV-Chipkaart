@@ -1,7 +1,9 @@
 package org.munkuk.database.dao;
 
 import org.munkuk.database.dao.interfaces.OVChipkaartDAO;
+import org.munkuk.database.dao.interfaces.ProductDAO;
 import org.munkuk.domain.OVChipkaart;
+import org.munkuk.domain.Product;
 import org.munkuk.domain.Reiziger;
 
 import java.sql.*;
@@ -24,8 +26,14 @@ public class OVChipkaartDAOPsql implements OVChipkaartDAO {
         preparedStatement.setDouble(4, ovChipkaart.getSaldo());
         preparedStatement.setInt(5, ovChipkaart.getReiziger().getId());
 
+//        ProductDAOPsql productDAOPsql = new ProductDAOPsql(connection);
+//        List<Product> products = productDAOPsql.findByOVChipkaart(ovChipkaart);
+//        products.forEach(ovChipkaart::addProduct);
+
         preparedStatement.executeUpdate();
         preparedStatement.close();
+
+        saveOVChipkaartProduct(ovChipkaart);
         return true;
     }
 
@@ -46,14 +54,20 @@ public class OVChipkaartDAOPsql implements OVChipkaartDAO {
 
         preparedStatement.executeUpdate();
         preparedStatement.close();
+
+        deleteOVChipkaartProduct(ovChipkaart);
+        saveOVChipkaartProduct(ovChipkaart);
         return true;
     }
 
     @Override
     public boolean delete(OVChipkaart ovChipkaart) throws SQLException {
+        deleteOVChipkaartProduct(ovChipkaart);
+
         String sqlStatement = "delete from ov_chipkaart where kaart_nummer = ?";
         PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement);
         preparedStatement.setInt(1, ovChipkaart.getId());
+
 
         preparedStatement.executeUpdate();
         preparedStatement.close();
@@ -111,5 +125,29 @@ public class OVChipkaartDAOPsql implements OVChipkaartDAO {
         Reiziger reiziger = reizigerDAOPsql.findById(reiziger_id);
 
         return new OVChipkaart(id, reiziger, geldig_tot, klasse, saldo);
+    }
+
+    private void saveOVChipkaartProduct(OVChipkaart ovChipkaart) throws SQLException {
+        String sqlStatement = "INSERT INTO ov_chipkaart_product (kaart_nummer, product_nummer) VALUES (?, ?)";
+        PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement);
+
+        for (Product product : ovChipkaart.getProducts()) {
+            preparedStatement.setInt(1, ovChipkaart.getId());
+            preparedStatement.setInt(2, product.getProduct_nummer());
+            preparedStatement.executeUpdate();
+        }
+
+//        preparedStatement.executeBatch();
+        preparedStatement.close();
+    }
+
+    private void deleteOVChipkaartProduct(OVChipkaart ovChipkaart) throws SQLException {
+        String sqlStatement = "DELETE FROM ov_chipkaart_product WHERE kaart_nummer = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement);
+
+        preparedStatement.setInt(1, ovChipkaart.getId());
+
+        preparedStatement.executeUpdate();
+        preparedStatement.close();
     }
 }

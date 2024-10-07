@@ -36,9 +36,17 @@ public class ProductDAOHibernate implements ProductDAO {
     @Override
     public boolean delete(Product product) throws SQLException {
         Transaction transaction = session.beginTransaction();
-        product.getOvChipkaarts().forEach(ovChipkaart -> ovChipkaart.removeProduct(product));
-        session.remove(product);
+//        product.getOvChipkaarts().forEach(ovChipkaart -> {
+//            System.out.println(ovChipkaart);
+//            ovChipkaart.removeProduct(product);
+//        });
 
+        List<OVChipkaart> ovChipkaarts = product.getOvChipkaarts();
+        for (OVChipkaart ovChipkaart : ovChipkaarts) {
+            ovChipkaart.removeProduct(product);
+        }
+
+        session.remove(product);
         transaction.commit();
         return true;
     }
@@ -51,6 +59,13 @@ public class ProductDAOHibernate implements ProductDAO {
 
         transaction.commit();
         return products;
+    }
+
+    public Product findById(int id) throws SQLException {
+        Transaction transaction = session.beginTransaction();
+        Product product = session.get(Product.class, id);
+        transaction.commit();
+        return product;
     }
 
     @Override

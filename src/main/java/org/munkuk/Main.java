@@ -23,6 +23,7 @@ public class Main {
         Session session = HibernateUtil.getSessionFactory().openSession();
         ReizigerDAOPsql reizigerDAOPsql = new ReizigerDAOPsql(DatabaseConnection.getConnection());
         OVChipkaartDAOPsql ovChipkaartDAOPsql = new OVChipkaartDAOPsql(DatabaseConnection.getConnection());
+        ProductDAOPsql productDAOPsql = new ProductDAOPsql(DatabaseConnection.getConnection());
         AdresDAOPsql adresDAOPsql = new AdresDAOPsql(DatabaseConnection.getConnection());
         Reiziger daan = new Reiziger(88, "D", "de", "Jong", Date.valueOf("2005-01-01"));
 
@@ -39,6 +40,7 @@ public class Main {
             testReizigerDAO(reizigerDAOPsql);
             testAddressDAO(daan, adresDAOPsql);
             testProductDAO(daan, ovChipkaartDAOHibernate, productDAOHibernate);
+            testProductDAO(daan, ovChipkaartDAOPsql, productDAOPsql);
             reizigerDAOPsql.delete(daan);
             testOVChipkaartDAO(reizigerDAOPsql, ovChipkaartDAOPsql);
             // End PSQL connection testing
@@ -175,14 +177,13 @@ public class Main {
         }
         System.out.println();
 
-//        productDAO.delete(productDAO.findByOVChipkaart())
-
         System.out.println("[Test] ProductDAO.save() eerst " + products.size() + " product.");
         OVChipkaart ovChipkaart = new OVChipkaart(100, reiziger, Date.valueOf("2024-12-20"), 2, 100);
         ovChipkaartDAO.save(ovChipkaart);
-        List<OVChipkaart> ovChipkaarts = new ArrayList<>();
-        ovChipkaarts.add(ovChipkaart);
-        Product product = new Product(120, "Studentenkorting", "Gratis rijden tijdens de week", 20.0, ovChipkaarts);
+//        List<OVChipkaart> ovChipkaarts = new ArrayList<>();
+//        ovChipkaarts.add(ovChipkaart);
+//        System.out.println(ovChipkaarts);
+        Product product = new Product(120, "Studentenkorting", "Gratis rijden tijdens de week", 20.0/*, *//*ovChipkaarts*/);
         ovChipkaart.addProduct(product);
         productDAO.save(product);
         products = productDAO.findAll();

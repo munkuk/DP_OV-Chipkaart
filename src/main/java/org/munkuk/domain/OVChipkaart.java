@@ -48,7 +48,7 @@ public class OVChipkaart {
     public void removeProduct(Product product) {
         if (products.contains(product)) {
             products.remove(product);
-            product.getOvChipkaarts().remove(this);
+//            product.getOvChipkaarts().remove(this); // Causes ConcurrentModificationError :-)
         }
     }
 
