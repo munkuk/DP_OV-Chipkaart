@@ -1,6 +1,8 @@
 package org.munkuk.database.dao;
 
+import lombok.SneakyThrows;
 import org.munkuk.database.dao.interfaces.ReizigerDAO;
+import org.munkuk.domain.OVChipkaart;
 import org.munkuk.domain.Reiziger;
 
 import java.sql.*;
@@ -24,6 +26,7 @@ public class ReizigerDAOPsql implements ReizigerDAO {
         preparedStatement.setString(3, reiziger.getTussenvoegsel());
         preparedStatement.setString(4, reiziger.getAchternaam());
         preparedStatement.setDate(5, reiziger.getGeboortedatum());
+
 
         preparedStatement.executeUpdate();
         preparedStatement.close();
@@ -53,6 +56,14 @@ public class ReizigerDAOPsql implements ReizigerDAO {
         PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement);
 
         preparedStatement.setInt(1, reiziger.getId());
+
+//        if (reiziger.getOvChipkaarten() != null) {
+//            OVChipkaartDAOPsql ovChipkaartDAOPsql = new OVChipkaartDAOPsql(connection);
+//            for (OVChipkaart ovChipkaart : reiziger.getOvChipkaarten()) {
+//                ovChipkaartDAOPsql.delete(ovChipkaart);
+//            }
+//        }
+
         preparedStatement.executeUpdate();
         preparedStatement.close();
 

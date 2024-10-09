@@ -2,11 +2,13 @@ package org.munkuk.database.dao;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 import org.munkuk.database.dao.interfaces.ProductDAO;
 import org.munkuk.domain.OVChipkaart;
 import org.munkuk.domain.Product;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProductDAOHibernate implements ProductDAO {
@@ -21,6 +23,13 @@ public class ProductDAOHibernate implements ProductDAO {
         session.persist(product);
 
         transaction.commit();
+
+        OVChipkaartDAOHibernate ovChipkaartDAOHibernate = new OVChipkaartDAOHibernate(session);
+        product.getOvChipkaarts().forEach(ovChipkaart -> {
+            if (ovChipkaartDAOHibernate.findById(ovChipkaart.getId()) == null) {
+                ovChipkaartDAOHibernate.save(ovChipkaart);
+            }
+        });
         return true;
     }
 
@@ -41,6 +50,7 @@ public class ProductDAOHibernate implements ProductDAO {
 //            ovChipkaart.removeProduct(product);
 //        });
 
+
         List<OVChipkaart> ovChipkaarts = product.getOvChipkaarts();
         for (OVChipkaart ovChipkaart : ovChipkaarts) {
             ovChipkaart.removeProduct(product);
@@ -48,18 +58,25 @@ public class ProductDAOHibernate implements ProductDAO {
 
         session.remove(product);
         transaction.commit();
+
+        OVChipkaartDAOHibernate ovChipkaartDAOHibernate = new OVChipkaartDAOHibernate(session);
+        product.getOvChipkaarts().forEach(ovChipkaart -> {
+            if (ovChipkaartDAOHibernate.findById(ovChipkaart.getId()) != null)
+                ovChipkaartDAOHibernate.update(ovChipkaart);
+        });
         return true;
     }
 
     @Override
     public List<Product> findByOVChipkaart(OVChipkaart ovChipkaart) throws SQLException {
         Transaction transaction = session.beginTransaction();
-        String hql = "SELECT p FROM Product p JOIN p.ovChipkaarts o WHERE o.id = :ovChipkaartId";
+        String hql = "SELECT p FROM Product p JOIN p.ovChipkaarts o where o.id = :ovChipkaartId";
         List<Product> products = session.createQuery(hql, Product.class).setParameter("ovChipkaartId", ovChipkaart.getId()).list();
 
         transaction.commit();
         return products;
     }
+
 
     public Product findById(int id) throws SQLException {
         Transaction transaction = session.beginTransaction();

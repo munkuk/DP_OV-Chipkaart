@@ -28,12 +28,18 @@ public class ProductDAOPsql implements ProductDAO {
         preparedStatement.setString(3, product.getBeschrijving());
         preparedStatement.setDouble(4, product.getPrijs());
 
-        // Adds the connection between OVChipkaart -> Product.
-        // product.getOvChipkaarts().forEach(ovChipkaart -> ovChipkaart.addProduct(product));
 
         preparedStatement.executeUpdate();
         preparedStatement.close();
 
+        // Adds the connection between OVChipkaart -> Product.
+        product.getOvChipkaarts().forEach(ovChipkaart -> ovChipkaart.addProduct(product));
+        OVChipkaartDAOPsql ovChipkaartDAOPsql = new OVChipkaartDAOPsql(connection);
+        for (OVChipkaart chipkaart : product.getOvChipkaarts()) {
+            if (ovChipkaartDAOPsql.findById(chipkaart.getId()) == null)
+                ovChipkaartDAOPsql.save(chipkaart);
+        }
+        deleteOVChipkaartProduct(product);
         saveOVChipkaartProduct(product);
 
         return true;
@@ -67,6 +73,13 @@ public class ProductDAOPsql implements ProductDAO {
         PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement);
 
         preparedStatement.setInt(1, product.getProduct_nummer());
+
+        OVChipkaartDAOPsql ovChipkaartDAOPsql = new OVChipkaartDAOPsql(connection);
+        product.getOvChipkaarts().forEach(ovChipkaart -> ovChipkaart.removeProduct(product));
+        for (OVChipkaart chipkaart : product.getOvChipkaarts()) {
+            if (ovChipkaartDAOPsql.findById(chipkaart.getId()) == null)
+                ovChipkaartDAOPsql.update(chipkaart);
+        }
 
         preparedStatement.executeUpdate();
         preparedStatement.close();
@@ -130,7 +143,6 @@ public class ProductDAOPsql implements ProductDAO {
     private void saveOVChipkaartProduct(Product product) throws SQLException {
         String sqlStatement = "INSERT INTO ov_chipkaart_product (kaart_nummer, product_nummer) VALUES (?,?)";
         PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement);
-
 
         for (OVChipkaart ovChipkaart : product.getOvChipkaarts()) {
             preparedStatement.setInt(1, ovChipkaart.getId());

@@ -30,6 +30,14 @@ public class OVChipkaartDAOPsql implements OVChipkaartDAO {
 //        List<Product> products = productDAOPsql.findByOVChipkaart(ovChipkaart);
 //        products.forEach(ovChipkaart::addProduct);
 
+        if (ovChipkaart.getReiziger() != null) {
+            ovChipkaart.getReiziger().getOvChipkaarten().add(ovChipkaart);
+            ReizigerDAOPsql reizigerDAOPsql = new ReizigerDAOPsql(connection);
+            if (reizigerDAOPsql.findById(ovChipkaart.getReiziger().getId()) == null) {
+                reizigerDAOPsql.save(ovChipkaart.getReiziger());
+            }
+        }
+
         preparedStatement.executeUpdate();
         preparedStatement.close();
 
@@ -68,6 +76,11 @@ public class OVChipkaartDAOPsql implements OVChipkaartDAO {
         PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement);
         preparedStatement.setInt(1, ovChipkaart.getId());
 
+        if (ovChipkaart.getReiziger() != null) {
+            ovChipkaart.getReiziger().getOvChipkaarten().remove(ovChipkaart);
+            ReizigerDAOPsql reizigerDAOPsql = new ReizigerDAOPsql(connection);
+            reizigerDAOPsql.update(ovChipkaart.getReiziger());
+        }
 
         preparedStatement.executeUpdate();
         preparedStatement.close();
