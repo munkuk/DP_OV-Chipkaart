@@ -29,6 +29,12 @@ public class AdresDAOPsql implements AdresDAO {
         preparedStatement.setString(5, adres.getWoonplaats());
         preparedStatement.setInt(6, adres.getReiziger().getId());
 
+        if (adres.getReiziger() != null) {
+            ReizigerDAOPsql reizigerDAOPsql = new ReizigerDAOPsql(connection);
+            if (reizigerDAOPsql.findById(adres.getReiziger().getId()) == null)
+                reizigerDAOPsql.save(adres.getReiziger());
+        }
+
         preparedStatement.executeUpdate();
         preparedStatement.close();
 

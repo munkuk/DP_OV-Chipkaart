@@ -10,25 +10,26 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
+@Setter
 @Entity @Table(name = "ov_chipkaart")
 @Getter @AllArgsConstructor @NoArgsConstructor
 public class OVChipkaart {
 
     @Id @Column(name = "kaart_nummer")
     private int id;
-    @Setter private Date geldig_tot;
-    @Setter private int klasse;
-    @Setter private double saldo;
+    private Date geldig_tot;
+    private int klasse;
+    private double saldo;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "reiziger_id")
-    @Setter private Reiziger reiziger;
+    private Reiziger reiziger;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "OV_Chipkaart_Product",
             joinColumns = @JoinColumn(name = "kaart_nummer"),
             inverseJoinColumns = @JoinColumn(name = "product_nummer"))
-    @Setter private List<Product> products = new ArrayList<>();
+    private List<Product> products = new ArrayList<>();
 
     public OVChipkaart(int id, Reiziger reiziger, Date geldig_tot, int klasse, int saldo) {
         this.id = id;

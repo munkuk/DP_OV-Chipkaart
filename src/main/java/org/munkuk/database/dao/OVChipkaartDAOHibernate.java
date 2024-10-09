@@ -7,7 +7,6 @@ import org.munkuk.database.dao.interfaces.OVChipkaartDAO;
 import org.munkuk.domain.OVChipkaart;
 import org.munkuk.domain.Reiziger;
 
-import java.sql.SQLException;
 import java.util.List;
 
 public class OVChipkaartDAOHibernate implements OVChipkaartDAO {
@@ -17,9 +16,17 @@ public class OVChipkaartDAOHibernate implements OVChipkaartDAO {
 
     @Override
     public boolean save(OVChipkaart ovChipkaart) throws HibernateException {
-        Transaction transaction = session.beginTransaction();
-        session.persist(ovChipkaart);
+        if (ovChipkaart.getReiziger() != null) {
+            ReizigerDAOHibernate reizigerDAOHibernate = new ReizigerDAOHibernate(session);
+            Reiziger existingReiziger = reizigerDAOHibernate.findById(ovChipkaart.getReiziger().getId());
 
+            if (existingReiziger != null) ovChipkaart.setReiziger(existingReiziger);
+            else reizigerDAOHibernate.save(ovChipkaart.getReiziger());
+        }
+
+        Transaction transaction = session.beginTransaction();
+
+        session.persist(ovChipkaart);
         transaction.commit();
         return true;
     }
@@ -37,6 +44,9 @@ public class OVChipkaartDAOHibernate implements OVChipkaartDAO {
     public boolean delete(OVChipkaart ovChipkaart) throws HibernateException {
         Transaction transaction = session.beginTransaction();
         session.remove(ovChipkaart);
+
+        if (ovChipkaart.getReiziger() != null)
+            ovChipkaart.getReiziger().getOvChipkaarten().remove(ovChipkaart);
 
         transaction.commit();
         return true;

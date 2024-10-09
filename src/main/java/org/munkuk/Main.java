@@ -32,21 +32,24 @@ public class Main {
             OVChipkaartDAOHibernate ovChipkaartDAOHibernate = new OVChipkaartDAOHibernate(session);
             ProductDAOHibernate productDAOHibernate = new ProductDAOHibernate(session);
 
-            if (reizigerDAOPsql.findById(daan.getId()) == null) {
-                reizigerDAOPsql.save(daan);
-            }
+//            reizigerDAOPsql.delete(daan);
 
-            // Start PSQL connection testing
-            testReizigerDAO(reizigerDAOPsql);
+            System.out.println("\nTesting AddressDAO using Psql");
             testAddressDAO(daan, adresDAOPsql);
-            testProductDAO(daan, ovChipkaartDAOHibernate, productDAOHibernate);
-            testProductDAO(daan, ovChipkaartDAOPsql, productDAOPsql);
-            reizigerDAOPsql.delete(daan);
-            testOVChipkaartDAO(reizigerDAOPsql, ovChipkaartDAOPsql);
-            // End PSQL connection testing
+            System.out.println("\nTesting OVChipkaartDAO using Psql");
+            testOVChipkaartDAO(daan, ovChipkaartDAOPsql);
+            System.out.println("\nTesting OVChipkaartDAO using Hibernate");
+            testOVChipkaartDAO(daan, ovChipkaartDAOHibernate);
 
-            testReizigerDAO(reizigerDAOHibernate);
-            testOVChipkaartDAO(reizigerDAOHibernate, ovChipkaartDAOHibernate);
+            System.out.println("\nTesting ProductDAO using Psql");
+            testProductDAO(daan, productDAOPsql);
+            System.out.println("\nTesting ProductDAO using Hibernate");
+            testProductDAO(daan, productDAOHibernate);
+
+            System.out.println("\nTesting ReizigerDAO using Hibernate");
+            testReizigerDAO(daan, reizigerDAOHibernate);
+            System.out.println("\nTesting ReizigerDAO using Psql");
+            testReizigerDAO(daan, reizigerDAOPsql);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         } finally {
@@ -63,7 +66,7 @@ public class Main {
      *
      * @throws SQLException
      */
-    private static void testReizigerDAO(ReizigerDAO rdao) throws SQLException {
+    private static void testReizigerDAO(Reiziger reiziger, ReizigerDAO rdao) throws SQLException {
         System.out.println("\n---------- Test ReizigerDAO -------------");
         System.out.println(rdao.getClass() + "\n");
 
@@ -95,9 +98,12 @@ public class Main {
         rdao.delete(sietske);
         reizigers = rdao.findAll();
         System.out.println("[Test] ReizigerDAO.delete() vervolgens: " + reizigers.size());
+
+        if (rdao.findById(reiziger.getId()) != null) // Delete straggling text Reiziger.
+            rdao.delete(reiziger);
     }
 
-    private static void testOVChipkaartDAO(ReizigerDAO rdao, OVChipkaartDAO ovcDAO) throws SQLException {
+    private static void testOVChipkaartDAO(Reiziger reiziger, OVChipkaartDAO ovcDAO) throws SQLException {
         System.out.println("\n---------- Test OVChipkaartDAO -------------");
         System.out.println(ovcDAO.getClass() + "\n");
 
@@ -108,12 +114,9 @@ public class Main {
         }
         System.out.println();
 
-        Reiziger daan = new Reiziger(88, "D", "de", "Jong", Date.valueOf("2005-01-01"));
-
         System.out.println("[Test] OVChipkaartDAO.save() eerst " + ovchipkaarts.size() + " ovchipkaarten.");
 
-        OVChipkaart ovChipkaart = new OVChipkaart(12345, daan, Date.valueOf("2024-12-20"), 1, 150);
-        rdao.save(daan);
+        OVChipkaart ovChipkaart = new OVChipkaart(12345, reiziger, Date.valueOf("2024-12-20"), 1, 150);
         ovcDAO.save(ovChipkaart);
 
         ovchipkaarts = ovcDAO.findAll();
@@ -126,11 +129,10 @@ public class Main {
 
         ovchipkaarts = ovcDAO.findAll();
         System.out.println("[Test] OVChipkaartDAO.delete() eerst: " + ovchipkaarts.size());
+
         ovcDAO.delete(ovChipkaart);
         ovchipkaarts = ovcDAO.findAll();
         System.out.println("[Test] OVChipkaartDAO.delete() vervolgens: " + ovchipkaarts.size());
-
-        rdao.delete(daan);
     }
 
     private static void testAddressDAO(Reiziger reiziger, AdresDAO adresDAO) throws SQLException {
@@ -166,7 +168,7 @@ public class Main {
         System.out.println("[Test] AdresDAO.delete() vervolgens: " + addresses.size());
     }
 
-    private static void testProductDAO(Reiziger reiziger, OVChipkaartDAO ovChipkaartDAO, ProductDAO productDAO) throws SQLException {
+    private static void testProductDAO(Reiziger reiziger, /*OVChipkaartDAO ovChipkaartDAO,*/ ProductDAO productDAO) throws SQLException {
         System.out.println("\n---------- Test ProductDAO -------------");
         System.out.println(productDAO.getClass() + "\n");
 
@@ -179,27 +181,23 @@ public class Main {
 
         System.out.println("[Test] ProductDAO.save() eerst " + products.size() + " product.");
         OVChipkaart ovChipkaart = new OVChipkaart(100, reiziger, Date.valueOf("2024-12-20"), 2, 100);
-        ovChipkaartDAO.save(ovChipkaart);
-//        List<OVChipkaart> ovChipkaarts = new ArrayList<>();
-//        ovChipkaarts.add(ovChipkaart);
-//        System.out.println(ovChipkaarts);
+
         Product product = new Product(120, "Studentenkorting", "Gratis rijden tijdens de week", 20.0/*, *//*ovChipkaarts*/);
         ovChipkaart.addProduct(product);
+
         productDAO.save(product);
         products = productDAO.findAll();
         System.out.println("[Test] ProductDAO.save() vervolgens: " + products.size() + " product.\n");
 
-        System.out.println("[Test] ProductDAO.update() eerst " + productDAO.findByOVChipkaart(ovChipkaart) + " product.");
+        System.out.println("[Test] ProductDAO.update() eerst " + productDAO.findById(product.getProduct_nummer()) + " product.");
         product.setNaam("Studentkorting");
         productDAO.update(product);
-        System.out.println("[Test] ProductDAO.update() vervolgens: " + productDAO.findByOVChipkaart(ovChipkaart) + " product.\n");
+        System.out.println("[Test] ProductDAO.update() vervolgens: " + productDAO.findById(product.getProduct_nummer()) + " product.\n");
 
         products = productDAO.findAll();
         System.out.println("[Test] ProductDAO.delete() eerst: " + products.size() + " product.");
         productDAO.delete(product);
         products = productDAO.findAll();
         System.out.println("[Test] ProductDAO.delete() vervolgens: " + products.size() + " product.");
-
-        ovChipkaartDAO.delete(ovChipkaart);
     }
 }

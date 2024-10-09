@@ -1,6 +1,8 @@
 package org.munkuk.database.dao;
 
+import lombok.SneakyThrows;
 import org.munkuk.database.dao.interfaces.ReizigerDAO;
+import org.munkuk.domain.OVChipkaart;
 import org.munkuk.domain.Reiziger;
 
 import java.sql.*;
@@ -24,6 +26,7 @@ public class ReizigerDAOPsql implements ReizigerDAO {
         preparedStatement.setString(3, reiziger.getTussenvoegsel());
         preparedStatement.setString(4, reiziger.getAchternaam());
         preparedStatement.setDate(5, reiziger.getGeboortedatum());
+
 
         preparedStatement.executeUpdate();
         preparedStatement.close();
@@ -50,9 +53,18 @@ public class ReizigerDAOPsql implements ReizigerDAO {
     @Override
     public boolean delete(Reiziger reiziger) throws SQLException {
         String sqlStatement = "DELETE FROM reiziger WHERE reiziger_id = ?";
+
+        if (reiziger.getOvChipkaarten() != null) {
+            OVChipkaartDAOPsql ovChipkaartDAOPsql = new OVChipkaartDAOPsql(connection);
+            for (OVChipkaart ovChipkaart : reiziger.getOvChipkaarten()) {
+                ovChipkaartDAOPsql.delete(ovChipkaart);
+            }
+        }
+
         PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement);
 
         preparedStatement.setInt(1, reiziger.getId());
+
         preparedStatement.executeUpdate();
         preparedStatement.close();
 
