@@ -3,9 +3,11 @@ package org.munkuk.database.dao;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
+import org.munkuk.database.dao.interfaces.OVChipkaartDAO;
 import org.munkuk.database.dao.interfaces.ProductDAO;
 import org.munkuk.domain.OVChipkaart;
 import org.munkuk.domain.Product;
+import org.munkuk.domain.Reiziger;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -18,18 +20,23 @@ public class ProductDAOHibernate implements ProductDAO {
 
     @Override
     public boolean save(Product product) throws SQLException {
-        Transaction transaction = session.beginTransaction();
         product.getOvChipkaarts().forEach(ovChipkaart -> ovChipkaart.addProduct(product));
-        session.persist(product);
-
-        transaction.commit();
 
         OVChipkaartDAOHibernate ovChipkaartDAOHibernate = new OVChipkaartDAOHibernate(session);
         product.getOvChipkaarts().forEach(ovChipkaart -> {
-            if (ovChipkaartDAOHibernate.findById(ovChipkaart.getId()) == null) {
+            OVChipkaart existingOVChipkaart = ovChipkaartDAOHibernate.findById(ovChipkaart.getId());
+
+            if (existingOVChipkaart == null) {
                 ovChipkaartDAOHibernate.save(ovChipkaart);
             }
         });
+
+
+        Transaction transaction = session.beginTransaction();
+
+        session.persist(product);
+
+        transaction.commit();
         return true;
     }
 
@@ -45,11 +52,6 @@ public class ProductDAOHibernate implements ProductDAO {
     @Override
     public boolean delete(Product product) throws SQLException {
         Transaction transaction = session.beginTransaction();
-//        product.getOvChipkaarts().forEach(ovChipkaart -> {
-//            System.out.println(ovChipkaart);
-//            ovChipkaart.removeProduct(product);
-//        });
-
 
         List<OVChipkaart> ovChipkaarts = product.getOvChipkaarts();
         for (OVChipkaart ovChipkaart : ovChipkaarts) {
@@ -90,6 +92,7 @@ public class ProductDAOHibernate implements ProductDAO {
         Transaction transaction = session.beginTransaction();
         String hql = "SELECT p FROM Product p";
         List<Product> products = session.createQuery(hql, Product.class).list();
+
         transaction.commit();
         return products;
     }

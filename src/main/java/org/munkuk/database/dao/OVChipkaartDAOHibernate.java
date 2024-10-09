@@ -17,20 +17,16 @@ public class OVChipkaartDAOHibernate implements OVChipkaartDAO {
     @Override
     public boolean save(OVChipkaart ovChipkaart) throws HibernateException {
         if (ovChipkaart.getReiziger() != null) {
-            ovChipkaart.getReiziger().getOvChipkaarten().add(ovChipkaart);
             ReizigerDAOHibernate reizigerDAOHibernate = new ReizigerDAOHibernate(session);
-//            System.out.println(ovChipkaart.getReiziger().getId());
-//            System.out.println(reizigerDAOHibernate.findById(ovChipkaart.getReiziger().getId()));
-            if (reizigerDAOHibernate.findById(ovChipkaart.getReiziger().getId()) == null)
-                reizigerDAOHibernate.save(ovChipkaart.getReiziger());
-//                System.out.println("YO THIS HAPPENED");
+            Reiziger existingReiziger = reizigerDAOHibernate.findById(ovChipkaart.getReiziger().getId());
 
+            if (existingReiziger != null) ovChipkaart.setReiziger(existingReiziger);
+            else reizigerDAOHibernate.save(ovChipkaart.getReiziger());
         }
 
         Transaction transaction = session.beginTransaction();
 
         session.persist(ovChipkaart);
-
         transaction.commit();
         return true;
     }

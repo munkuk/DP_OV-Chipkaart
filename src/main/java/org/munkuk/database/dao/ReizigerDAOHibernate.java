@@ -37,7 +37,8 @@ public class ReizigerDAOHibernate implements ReizigerDAO {
     @Override
     public boolean delete(Reiziger reiziger) throws HibernateException {
         Transaction transaction = session.beginTransaction();
-        session.remove(reiziger);
+        Reiziger managedReiziger = session.merge(reiziger);
+        session.remove(managedReiziger);
 
         transaction.commit();
         return true;

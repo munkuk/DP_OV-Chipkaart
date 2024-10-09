@@ -32,19 +32,24 @@ public class Main {
             OVChipkaartDAOHibernate ovChipkaartDAOHibernate = new OVChipkaartDAOHibernate(session);
             ProductDAOHibernate productDAOHibernate = new ProductDAOHibernate(session);
 
-            reizigerDAOPsql.delete(daan);
+//            reizigerDAOPsql.delete(daan);
 
-            // Start PSQL connection testing
-            testReizigerDAO(reizigerDAOPsql);
+            System.out.println("\nTesting AddressDAO using Psql");
             testAddressDAO(daan, adresDAOPsql);
-            testProductDAO(daan, productDAOPsql);
+            System.out.println("\nTesting OVChipkaartDAO using Psql");
             testOVChipkaartDAO(daan, ovChipkaartDAOPsql);
-            // End PSQL connection testing
-
-            testReizigerDAO(reizigerDAOHibernate);
-            testProductDAO(daan, productDAOHibernate);
+            System.out.println("\nTesting OVChipkaartDAO using Hibernate");
             testOVChipkaartDAO(daan, ovChipkaartDAOHibernate);
 
+            System.out.println("\nTesting ProductDAO using Psql");
+            testProductDAO(daan, productDAOPsql);
+            System.out.println("\nTesting ProductDAO using Hibernate");
+            testProductDAO(daan, productDAOHibernate);
+
+            System.out.println("\nTesting ReizigerDAO using Hibernate");
+            testReizigerDAO(daan, reizigerDAOHibernate);
+            System.out.println("\nTesting ReizigerDAO using Psql");
+            testReizigerDAO(daan, reizigerDAOPsql);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         } finally {
@@ -61,7 +66,7 @@ public class Main {
      *
      * @throws SQLException
      */
-    private static void testReizigerDAO(ReizigerDAO rdao) throws SQLException {
+    private static void testReizigerDAO(Reiziger reiziger, ReizigerDAO rdao) throws SQLException {
         System.out.println("\n---------- Test ReizigerDAO -------------");
         System.out.println(rdao.getClass() + "\n");
 
@@ -93,9 +98,12 @@ public class Main {
         rdao.delete(sietske);
         reizigers = rdao.findAll();
         System.out.println("[Test] ReizigerDAO.delete() vervolgens: " + reizigers.size());
+
+        if (rdao.findById(reiziger.getId()) != null) // Delete straggling text Reiziger.
+            rdao.delete(reiziger);
     }
 
-    private static void testOVChipkaartDAO(Reiziger reiziger,/*ReizigerDAO rdao, */OVChipkaartDAO ovcDAO) throws SQLException {
+    private static void testOVChipkaartDAO(Reiziger reiziger, OVChipkaartDAO ovcDAO) throws SQLException {
         System.out.println("\n---------- Test OVChipkaartDAO -------------");
         System.out.println(ovcDAO.getClass() + "\n");
 
@@ -121,6 +129,7 @@ public class Main {
 
         ovchipkaarts = ovcDAO.findAll();
         System.out.println("[Test] OVChipkaartDAO.delete() eerst: " + ovchipkaarts.size());
+
         ovcDAO.delete(ovChipkaart);
         ovchipkaarts = ovcDAO.findAll();
         System.out.println("[Test] OVChipkaartDAO.delete() vervolgens: " + ovchipkaarts.size());

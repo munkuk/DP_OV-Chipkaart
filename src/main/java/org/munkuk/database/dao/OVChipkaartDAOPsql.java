@@ -78,6 +78,7 @@ public class OVChipkaartDAOPsql implements OVChipkaartDAO {
 
         if (ovChipkaart.getReiziger() != null) {
             ovChipkaart.getReiziger().getOvChipkaarten().remove(ovChipkaart);
+
             ReizigerDAOPsql reizigerDAOPsql = new ReizigerDAOPsql(connection);
             reizigerDAOPsql.update(ovChipkaart.getReiziger());
         }
